@@ -1,0 +1,30 @@
+router.get("/api/countries/check", async (req, res) => {
+  const { name } = req.body;
+
+  try {
+    // Check if the country exists
+    const existingCountry = await Country.findOne({ name });
+
+    if (existingCountry) {
+      res.json(existingCountry);
+    } else {
+      res.json({ exists: false });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+router.get("/api/countries", async (req, res) => {
+  try {
+    // Fetch countries from Restcountries API
+    const response = await fetch(`https://restcountries.com/v3.1/all`);
+    const countries = await response.json();
+    console.log(countries);
+
+    res.json(countries);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch countries" });
+  }
+});
