@@ -8,17 +8,23 @@ router.post("/api/countries", async (req, res) => {
   const { name } = req.body;
 
   try {
+    if (!name) {
+        return res.status(400).json({ error: 'Name is required' });
+      }
     // Check if the country already exists
     const existingCountry = await Country.findOne({ name });
 
     if (existingCountry) {
-      // Country already exists, return a message or handle as needed
-      return res.status(400).json({ error: "Country already exists" });
-    }
-
-    // Country doesn't exist, create a new entry
-    const newCountry = await Country.create({ name });
-    res.json(newCountry);
+        // Update the country's name based on its ID
+      const updatedCountry = await Country.findByIdAndUpdate(existingCountry._id, { name }, { new: true })
+      return res.status(200).json(updatedCountry);
+        
+      } else {
+        // Country doesn't exist, create a new one
+        const newCountry = new Country({ name });
+        await newCountry.save();
+        return res.status(201).json(newCountry);
+      }
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
