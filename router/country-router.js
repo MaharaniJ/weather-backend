@@ -3,6 +3,7 @@ const router = express.Router();
 const Country = require("../model/country-model");
 const fetch = require("node-fetch");
 require("dotenv").config();
+const apiUrl = "https://api.openweathermap.org/data/2.5/weather";
 
 router.post("/api/countries", async (req, res) => {
   const { name } = req.body;
@@ -55,7 +56,7 @@ router.get("/api/countries/:country", async (req, res) => {
   try {
     const apiKey = process.env.APIKEY;
     const weatherResponse = await fetch(
-      `https://api.openweathermap.org/data/2.5/weather?q=${country}&units=metric&appid=${apiKey}`
+      `${apiUrl}?q=${country}&units=metric&appid=${apiKey}`
     );
     const weatherData = await weatherResponse.json();
     const combinedData = { country, weather: weatherData };
@@ -67,5 +68,25 @@ router.get("/api/countries/:country", async (req, res) => {
 });
 
 
+router.get('/api/weather', async(req, res) => {
+  const {search} = req.query;
+  try {
+    if(!search){
+      res.status(404).json({ error:"Please provide the name"})
+    }
+    else{
+      const apiKey = process.env.APIKEY;
+      const weatherRes = await fetch(
+        `${apiUrl}?q=${search}&appid=${apiKey}`
+      );
+      const weatherData = await weatherRes.json();
+      const Data = { search, weather: weatherData };
+  
+      res.json(Data);
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch data" });
+  }
+})
 
 module.exports = router;
